@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStop - Estado del Colectivo</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+    h1 {
+      font-size: 3.5em;
+      margin-bottom: 20px;
+      color: #9c0b10;
+    }
+    p {
+      font-size: 2em;
+      margin: 10px;
+    }
+    .data-box {
+      display: inline-block;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #fff;
+      margin-top: 10px;
+    }
+    #estado {
+      font-weight: bold;
+      color: red;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 0.8em;
+    }
+  </style>
+</head>
+<body>
+  <h1>SmartStop</h1>
+  <div class="data-box">
+    <p id="latitud">Latitud: --</p>
+    <p id="longitud">Longitud: --</p>
+    <p id="velocidad">Velocidad: -- km/h</p>
+    <p id="tiempoLlegada">Tiempo de llegada: -- minutos</p>
+    <p id="estado">Estado: --</p>
+  </div>
+
+  <footer>Actualización automática cada 5 segundos.</footer>
+
+  <script>
+    function updateData() {
+      fetch('http://192.168.63.101/data')  
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('latitud').innerHTML = 'Latitud: ' + data.latitud.toFixed(6);
+          document.getElementById('longitud').innerHTML = 'Longitud: ' + data.longitud.toFixed(6);
+          document.getElementById('velocidad').innerHTML = 'Velocidad: ' + data.velocidad.toFixed(2) + ' km/h';
+          
+          // Si el tiempo de llegada es mayor a 60 minutos, muestra "Colectivo demorado"
+          if (data.tiempo > 60) {
+            document.getElementById('tiempoLlegada').innerHTML = 'Tiempo de llegada: Colectivo demorado';
+            document.getElementById('estado').innerHTML = 'Estado: Colectivo demorado +60minutos';
+          } else {
+            document.getElementById('tiempoLlegada').innerHTML = 'Tiempo de llegada: ' + data.tiempo + ' minutos';
+            document.getElementById('estado').innerHTML = 'Estado: En ruta';
+          }
+        })
+        .catch(error => {
+          console.error('Error al obtener los datos:', error);
+          document.getElementById('estado').innerHTML = 'Error en la conexión';
+        });
+    }
+
+    // Actualizar datos cada 5 segundos
+    setInterval(updateData, 5000);
+  </script>
+</body>
+</html>
